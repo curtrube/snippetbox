@@ -36,9 +36,9 @@ func main() {
 	// Use the http.NewServeMux() function to initialize a new servemux, then
 	// register the home function as the handler for the "/" URL pattern.
 	mux := http.NewServeMux()
-	mux.HandleFunc("/{$}", home)                      // Restrict this route to exact matches on / only.
-	mux.HandleFunc("/snippet/view/{id}", snippetView) // Add the {id} wildcard segment
-	mux.HandleFunc("/snippet/create", snippetCreate)
+	mux.HandleFunc("GET /{$}", home)                      // Restrict this route to exact matches on / only.
+	mux.HandleFunc("GET /snippet/view/{id}", snippetView) // Add the {id} wildcard segment
+	mux.HandleFunc("GET /snippet/create", snippetCreate)
 
 	// Print a log message to say the that server is starting.
 	log.Print("starting server on :4000")
