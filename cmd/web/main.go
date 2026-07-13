@@ -7,8 +7,11 @@ import (
 	"os"
 )
 
-func main() {
+type application struct {
+	logger *slog.Logger
+}
 
+func main() {
 	// Define a new command-line flag with the name 'addr', a default value of ":4000"
 	// and some short help text explaining what the flag controls. The value of the
 	// flag will be stored in the addr variable at runtime.
@@ -28,6 +31,12 @@ func main() {
 		Level: slog.LevelDebug,
 	}))
 
+	// Initialize a new instance of our application struct, containing the dependencies
+	// (for now, just the structured logger).
+	app := &application{
+		logger: logger,
+	}
+
 	mux := http.NewServeMux()
 
 	// Create a file server which serves files out of the "./ui/static" directory.
@@ -40,10 +49,10 @@ func main() {
 	// "/static" prefix before the request reaches the file server.
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
-	mux.HandleFunc("GET /{$}", home)
-	mux.HandleFunc("GET /snippet/view/{id}", snippetView)
-	mux.HandleFunc("GET /snippet/create", snippetCreate)
-	mux.HandleFunc("POST /snippet/create", snippetCreatePost)
+	mux.HandleFunc("GET /{$}", app.home)
+	mux.HandleFunc("GET /snippet/view/{id}", app.snippetView)
+	mux.HandleFunc("GET /snippet/create", app.snippetCreate)
+	mux.HandleFunc("POST /snippet/create", app.snippetCreatePost)
 
 	// Use the Info() method to log the starting server message at Info severity
 	// (along with the listen address as an attribute).
