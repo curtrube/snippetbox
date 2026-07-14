@@ -7,11 +7,15 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/curtrube/snippetbox/internal/models"
 	_ "github.com/go-sql-driver/mysql" // New import
 )
 
+// Add a snippets field to the application struct. This will allow us to
+// use the SnippetModel type in our handlers.
 type application struct {
-	logger *slog.Logger
+	logger   *slog.Logger
+	snippets *models.SnippetModel
 }
 
 func main() {
@@ -51,8 +55,12 @@ func main() {
 
 	// Initialize a new instance of our application struct, containing the dependencies
 	// (for now, just the structured logger).
+
+	// Initialize a models.SnippetModel instance containing the DB connection pool and
+	// add it to the application dependencies.
 	app := &application{
-		logger: logger,
+		logger:   logger,
+		snippets: &models.SnippetModel{DB: db},
 	}
 
 	// Use the Info() method to log the starting server message at Info severity
