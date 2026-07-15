@@ -1,10 +1,12 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"html/template"
 	"net/http"
 	"strconv"
+
+	"github.com/curtrube/snippetbox/internal/models"
 )
 
 // Change the signature of the home handler so it is defined as a method
@@ -12,44 +14,67 @@ import (
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "Go")
 
-	// Initialize a slice containing the paths to the two files. It's important
-	// to note that the file containing our base template must be the *first*
-	// file in the slice.
-	files := []string{
-		"./ui/html/base.tmpl",
-		"./ui/html/partials/nav.tmpl",
-		"./ui/html/pages/home.tmpl",
-	}
-
-	// Use the template.ParseFiles() function to read the template file into a
-	// template set. Notice that we use ... to pass the contents of of the files
-	// slice as variadic arguments.
-
-	ts, err := template.ParseFiles(files...)
+	snippets, err := app.snippets.Latest()
 	if err != nil {
-		app.serveError(w, r, err) // Use the serveError() helper.
+		app.serveError(w, r, err)
 		return
 	}
 
-	// Then we use the Execute() method on the template set to write the template
-	// content as the response body. The last parameter to Execute() represents
-	// any dynamic data that we want to pass in, which for now we'll leave as nil.
-
-	err = ts.ExecuteTemplate(w, "base", nil)
-	if err != nil {
-		app.serveError(w, r, err) // Use the serveError() helper.
+	for _, snippet := range snippets {
+		fmt.Fprintf(w, "%+v\n", snippet)
 	}
+
+	//// Initialize a slice containing the paths to the two files. It's important
+	//// to note that the file containing our base template must be the *first*
+	//// file in the slice.
+	//files := []string{
+	//	"./ui/html/base.tmpl",
+	//	"./ui/html/partials/nav.tmpl",
+	//	"./ui/html/pages/home.tmpl",
+	//}
+
+	//// Use the template.ParseFiles() function to read the template file into a
+	//// template set. Notice that we use ... to pass the contents of of the files
+	//// slice as variadic arguments.
+
+	//ts, err := template.ParseFiles(files...)
+	//if err != nil {
+	//	app.serveError(w, r, err) // Use the serveError() helper.
+	//	return
+	//}
+
+	//// Then we use the Execute() method on the template set to write the template
+	//// content as the response body. The last parameter to Execute() represents
+	//// any dynamic data that we want to pass in, which for now we'll leave as nil.
+
+	//err = ts.ExecuteTemplate(w, "base", nil)
+	//if err != nil {
+	//	app.serveError(w, r, err) // Use the serveError() helper.
+	//}
 }
 
-// Change the signature of the snippetView handler so it is defined as a method
-// against *application.
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 		return
 	}
-	fmt.Fprintf(w, "Display a specific snippet with ID %d...", id)
+
+	// Use the SnippetModel's Get() method to retrieve the data for a specific
+	// record based on its ID. If not matching record is found, return a 404
+	// Not Found response.
+	snippet, err := app.snippets.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serveError(w, r, err)
+		}
+		return
+	}
+
+	// Write the snippet data as a plain-text HTTP response body.
+	fmt.Fprintf(w, "%+v", snippet)
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
