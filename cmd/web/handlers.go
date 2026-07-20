@@ -21,37 +21,29 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, snippet := range snippets {
-		fmt.Fprintf(w, "%+v\n", snippet)
+	files := []string{
+		"./ui/html/base.tmpl",
+		"./ui/html/partials/nav.tmpl",
+		"./ui/html/pages/home.tmpl",
 	}
 
-	//// Initialize a slice containing the paths to the two files. It's important
-	//// to note that the file containing our base template must be the *first*
-	//// file in the slice.
-	//files := []string{
-	//	"./ui/html/base.tmpl",
-	//	"./ui/html/partials/nav.tmpl",
-	//	"./ui/html/pages/home.tmpl",
-	//}
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serveError(w, r, err) // Use the serveError() helper.
+		return
+	}
 
-	//// Use the template.ParseFiles() function to read the template file into a
-	//// template set. Notice that we use ... to pass the contents of of the files
-	//// slice as variadic arguments.
+	// Create a new instance of templateData struct holding the slice
+	// of snippets.
+	data := templateData{
+		Snippets: snippets,
+	}
 
-	//ts, err := template.ParseFiles(files...)
-	//if err != nil {
-	//	app.serveError(w, r, err) // Use the serveError() helper.
-	//	return
-	//}
-
-	//// Then we use the Execute() method on the template set to write the template
-	//// content as the response body. The last parameter to Execute() represents
-	//// any dynamic data that we want to pass in, which for now we'll leave as nil.
-
-	//err = ts.ExecuteTemplate(w, "base", nil)
-	//if err != nil {
-	//	app.serveError(w, r, err) // Use the serveError() helper.
-	//}
+	// Pass in the templateData struct when executing the template.
+	err = ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.serveError(w, r, err) // Use the serveError() helper.
+	}
 }
 
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
