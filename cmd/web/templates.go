@@ -9,8 +9,9 @@ import (
 
 // Include a Snippets fields in the templateData struct.
 type templateData struct {
-	Snippet  models.Snippet
-	Snippets []models.Snippet
+	CurrentYear int
+	Snippet     models.Snippet
+	Snippets    []models.Snippet
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {
