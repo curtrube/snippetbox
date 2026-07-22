@@ -2,8 +2,6 @@ package main
 
 import "net/http"
 
-// Update the signature for the routes() method so that it returns a
-// http.Handler instead of *http.ServeMux.
 func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
@@ -15,5 +13,6 @@ func (app *application) routes() http.Handler {
 	mux.HandleFunc("GET /snippet/create", app.snippetCreate)
 	mux.HandleFunc("POST /snippet/create", app.snippetCreatePost)
 
-	return commonHeaders(mux)
+	// Wrap the existing chain with the logRequest middleware.
+	return app.logRequest(commonHeaders(mux))
 }
