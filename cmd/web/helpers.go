@@ -8,10 +8,10 @@ import (
 	"time"
 )
 
-// The serveError helper writes a log entry at Error level (including the request
+// The serverError helper writes a log entry at Error level (including the request
 // method and URI attributes), then sends a generic 500 Internal Server Error
 // response to the user.
-func (app *application) serveError(w http.ResponseWriter, r *http.Request, err error) {
+func (app *application) serverError(w http.ResponseWriter, r *http.Request, err error) {
 	var (
 		method = r.Method
 		uri    = r.URL.RequestURI()
@@ -42,7 +42,7 @@ func (app *application) render(
 	ts, ok := app.templateCache[page]
 	if !ok {
 		err := fmt.Errorf("the template %s does not exist", page)
-		app.serveError(w, r, err)
+		app.serverError(w, r, err)
 		return
 	}
 
@@ -54,7 +54,7 @@ func (app *application) render(
 	// and then return.
 	err := ts.ExecuteTemplate(buf, "base", data)
 	if err != nil {
-		app.serveError(w, r, err)
+		app.serverError(w, r, err)
 		return
 	}
 
