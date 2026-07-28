@@ -48,9 +48,6 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Use the SnippetModel's Get() method to retrieve the data for a specific
-	// record based on its ID. If not matching record is found, return a 404
-	// Not Found response.
 	snippet, err := app.snippets.Get(id)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
@@ -61,11 +58,9 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// And do the same thing again here...
 	data := app.newTemplateData(r)
 	data.Snippet = snippet
 
-	// Use the new render helper.
 	app.render(w, r, http.StatusOK, "view.tmpl", data)
 }
 
@@ -109,6 +104,10 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 		app.serverError(w, r, err)
 		return
 	}
+
+	// Use the Put() method to add a string value ("Snippet successfully created!")
+	// and the corresponding key ("flash") to the session data.
+	app.sessionManager.Put(r.Context(), "flash", "Snippet created successfully")
 
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }
