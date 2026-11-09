@@ -1,5 +1,5 @@
 # Use the official Golang image for building
-FROM golang:1.26-alpine AS builder
+FROM golang:1.27-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -27,7 +27,7 @@ WORKDIR /app
 COPY --from=builder /app/web .
 
 # Copy web UI assets
-COPY --from=builder /app/ui ./ui
+COPY --from=builder /app/assets ./assets
 
 USER app
 

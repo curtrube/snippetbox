@@ -1,7 +1,7 @@
 services:
   mysql:
     image: mysql:9.7
-    container_name: mysql-dev
+    container_name: snippetbox-mysql
     restart: unless-stopped
     ports:
       - "3306:3306"
