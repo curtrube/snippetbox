@@ -58,6 +58,12 @@ func main() {
 	sessionManager.Store = mysqlstore.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
 
+	// Make sure the that the Secure attribute is set on our session cookies.
+	// Setting this means that the cookie will only be sent by a user's web
+	// browser when an HTTPS connection is being used (and won't be sent over an
+	// unsecure HTTP connection).
+	sessionManager.Cookie.Secure = true
+
 	app := &application{
 		logger:         logger,
 		snippets:       &models.SnippetModel{DB: db},
@@ -66,9 +72,26 @@ func main() {
 		sessionManager: sessionManager,
 	}
 
+	// Initialize a new http.Server struct. We set the Addr and Handler fields so
+	// that the server uses the same network address and routes as before.
+	src := http.Server{
+		Addr:    *addr,
+		Handler: app.routes(),
+		// Create a *log.Logger from our structured logger handler, which writes
+		// log entries at the Error level, and assign it to the Errorlog field. If
+		// you would prefer to log the server errors at Warn level instead, you
+		// could pass slog.LevelWarn as the final parameter.
+		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+
 	logger.Info("starting server", "addr", *addr)
 
-	err = http.ListenAndServe(*addr, app.routes())
+	// Call the ListenAndServe() method on our new http.Server struct to start
+	// the server.
+	err = src.ListenAndServeTLS("./assets/tls/cert.pem", "./assets/tls/key.pem")
 	logger.Error(err.Error())
 	os.Exit(1)
 }
