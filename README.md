@@ -11,18 +11,21 @@ ON snippetbox.*
 TO 'web'@'%';
 ```
 
-## Migrations
+## DB Migrations
+
+Database migrations are managed through [migrate](https://github.com/golang-migrate/migrate).
+
 
 create a new set of migration files
 
 ```
-./migrate create -ext sql -dir migrations -seq session
+./migrate create -ext sql -dir migrations -seq create_snippet_table 
 ```
 
 execute migrations
 
 ```
-./migrate -source file://migrations -database 'mysql://root:SuperSecret!@tcp(localhost:3306)/snippetbox' up 2
+./migrate -source file://db/migrations -database 'mysql://root:SuperSecret!@tcp(localhost:3306)/snippetbox' up
 ```
 
 
