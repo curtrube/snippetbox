@@ -1,25 +1,20 @@
 # snippetbox
 
-## Allow connections from your Docker network
-If you want to allow the web user to connect from any host, you can create an account with a wildcard host:
+MYSQL_HOST=mysql.internal
+MYSQL_PORT=3306
+MYSQL_DATABASE=users_db
+MYSQL_USERNAME=users_service
+MYSQL_PASSWORD=${MYSQL_PASSWORD}
 
-```sql
-CREATE USER 'web'@'%' IDENTIFIED BY 'pass';
-
-GRANT SELECT, INSERT, UPDATE, DELETE
-ON snippetbox.*
-TO 'web'@'%';
-```
 
 ## DB Migrations
 
 Database migrations are managed through [migrate](https://github.com/golang-migrate/migrate).
 
-
-create a new set of migration files
+To create a new set of migration files
 
 ```
-./migrate create -ext sql -dir migrations -seq create_snippet_table 
+./migrate create -ext sql -dir migrations -seq create_snippet_table
 ```
 
 execute migrations
@@ -33,7 +28,11 @@ execute migrations
 
 - [ ] Read ENV variables (db connString, port, etc)
 - [ ] CI/CD
+    - [ ] lint - golangci-lint
+    - [ ] test - gotest
+    - [ ] build - build the image
+    - [ ] release - https://github.com/cycjimmy/semantic-release-action
 - [ ] export OTEL (traces, logs, etc)
-- [ ] DB migrations
+- [X] DB migrations
 - [ ] Handle graceful server shutdown (SIGINT/SIGTERM)
 - [ ] Migrate to PostgreSQL
