@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"html/template"
@@ -19,6 +20,7 @@ import (
 type application struct {
 	logger         *slog.Logger
 	snippets       *models.SnippetModel
+	users          *models.UserModel
 	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
 	sessionManager *scs.SessionManager
@@ -67,20 +69,22 @@ func main() {
 	app := &application{
 		logger:         logger,
 		snippets:       &models.SnippetModel{DB: db},
+		users:          &models.UserModel{DB: db},
 		templateCache:  templateCache,
 		formDecoder:    formDecoder,
 		sessionManager: sessionManager,
 	}
 
+	tlsConfig := &tls.Config{
+		MinVersion: tls.VersionTLS13,
+	}
+
 	// Initialize a new http.Server struct. We set the Addr and Handler fields so
 	// that the server uses the same network address and routes as before.
 	src := http.Server{
-		Addr:    *addr,
-		Handler: app.routes(),
-		// Create a *log.Logger from our structured logger handler, which writes
-		// log entries at the Error level, and assign it to the Errorlog field. If
-		// you would prefer to log the server errors at Warn level instead, you
-		// could pass slog.LevelWarn as the final parameter.
+		Addr:         *addr,
+		Handler:      app.routes(),
+		TLSConfig:    tlsConfig,
 		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
