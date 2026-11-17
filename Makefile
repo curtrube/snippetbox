@@ -10,10 +10,15 @@ help: ## Display this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  %-15s %s\n", $$1, $$2}'
 
+build: ## Build the application
+	go build -o bin/web ./cmd/web
 
-# Run all pending migrations
+clean: ## Remove build artifacts
+	rm -rf bin/
+
 db-migrate: db-migrate-up ## Alias for db-migrate-up
 
+# Run all pending migrations
 db-migrate-up: ## Run the database migrations
 	@echo "Running database migrations..."
 	migrate \
