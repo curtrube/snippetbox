@@ -1,4 +1,4 @@
-.PHONY: db-migrate db-migrate-up db-migrate-down
+.PHONY: build clean db-migrate db-migrate-up db-migrate-down help test
 
 # Default target
 .DEFAULT_GOAL := help
@@ -30,3 +30,6 @@ db-migrate-down: ## Roll back the most recent migration
 	migrate \
 		-source file://db/migrations \
 		-database 'mysql://root:SuperSecret!@tcp(localhost:3306)/snippetbox' down 1
+
+test: ## Run tests
+	go test -v ./cmd/web
